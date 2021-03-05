@@ -24,6 +24,9 @@ import org.apache.rocketmq.common.protocol.route.QueueData;
 import org.apache.rocketmq.common.protocol.route.TopicRouteData;
 
 public class TopicPublishInfo {
+    public TopicPublishInfo() {
+    }
+
     //是否是顺序主题，用于发送顺序消息
     private boolean orderTopic = false;
     private boolean haveTopicRouterInfo = false;

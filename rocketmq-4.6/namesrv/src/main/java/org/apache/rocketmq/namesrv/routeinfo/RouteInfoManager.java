@@ -16,6 +16,7 @@
  */
 package org.apache.rocketmq.namesrv.routeinfo;
 
+import com.alibaba.fastjson.JSONObject;
 import io.netty.channel.Channel;
 import org.apache.rocketmq.common.DataVersion;
 import org.apache.rocketmq.common.MixAll;
@@ -107,6 +108,7 @@ public class RouteInfoManager {
 
         return topicList.encode();
     }
+
 
     public RegisterBrokerResult registerBroker(
             final String clusterName,
@@ -216,7 +218,16 @@ public class RouteInfoManager {
         } catch (Exception e) {
             log.error("registerBroker Exception", e);
         }
-
+        String brokerAddrTable = JSONObject.toJSONString(this.brokerAddrTable);
+        String topicQueueTable = JSONObject.toJSONString(this.topicQueueTable);
+        String clusterAddrTable = JSONObject.toJSONString(this.clusterAddrTable);
+        String brokerLiveTable = JSONObject.toJSONString(this.brokerLiveTable);
+        String filterServerTable = JSONObject.toJSONString(this.filterServerTable);
+        System.out.println(brokerAddrTable);
+        System.out.println(topicQueueTable);
+        System.out.println(clusterAddrTable);
+        System.out.println(brokerLiveTable);
+        System.out.println(filterServerTable);
         return result;
     }
 

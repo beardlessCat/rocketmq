@@ -79,7 +79,7 @@ public class CommitLog {
 
         if (FlushDiskType.SYNC_FLUSH == defaultMessageStore.getMessageStoreConfig().getFlushDiskType()) {
 
-//            对于同步刷盘而言，会构造一个GroupCommitRequest对象，
+           // 对于同步刷盘而言，会构造一个GroupCommitRequest对象，defaultMessageStore
 //            表明从哪里写，写多少字节。然后等待刷盘工作的完成。
             this.flushCommitLogService = new GroupCommitService();
 
@@ -172,8 +172,10 @@ public class CommitLog {
 
     public SelectMappedBufferResult getData(final long offset, final boolean returnFirstOnNotFound) {
         int mappedFileSize = this.defaultMessageStore.getMessageStoreConfig().getMappedFileSizeCommitLog();
+        //根据offset 获取mappedFile
         MappedFile mappedFile = this.mappedFileQueue.findMappedFileByOffset(offset, returnFirstOnNotFound);
         if (mappedFile != null) {
+            //获取再commitLog中的物理偏移量
             int pos = (int) (offset % mappedFileSize);
             SelectMappedBufferResult result = mappedFile.selectMappedBuffer(pos);
             return result;
@@ -267,6 +269,7 @@ public class CommitLog {
                                                      final boolean readBody) {
         try {
             // 1 TOTAL SIZE
+
             // 当前的消息大小
             int totalSize = byteBuffer.getInt();
 
@@ -966,7 +969,6 @@ public class CommitLog {
                 return this.rollNextFile(mappedFile.getFileFromOffset());
             }
         }
-
         return -1;
     }
 
@@ -1453,8 +1455,9 @@ public class CommitLog {
             keyBuilder.append(msgInner.getTopic());
             keyBuilder.append('-');
             keyBuilder.append(msgInner.getQueueId());
+            //topic-queueId
             String key = keyBuilder.toString();
-
+            // 计算queueOffset
             Long queueOffset = CommitLog.this.topicQueueTable.get(key);
             if (null == queueOffset) {
                 queueOffset = 0L;
@@ -1506,7 +1509,7 @@ public class CommitLog {
             //确定当前这个Commietlog文件是否有足够的可用空间存储
             //maxBlank:当前这个Commitlog文件（对应的MappedFile）的剩余空间
             //一个Message不能跨越两个Commitlog
-            //每个CommitLog文件都要确保预留8个字节来表示这个CommitLog文件结尾
+            //每个CommitLog文件都要确保预留【8】个字节来表示这个CommitLog文件结尾
             // Determines whether there is sufficient free space
 
             if ((msgLen + END_FILE_MIN_BLANK_LENGTH) > maxBlank) {

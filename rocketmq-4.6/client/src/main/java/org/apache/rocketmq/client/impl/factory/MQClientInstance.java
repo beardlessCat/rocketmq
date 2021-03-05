@@ -631,7 +631,7 @@ public class MQClientInstance {
             }
         }
     }
-
+    //从nameServer中更新topic路由
     public boolean updateTopicRouteInfoFromNameServer(final String topic, boolean isDefault,
         DefaultMQProducer defaultMQProducer) {
         try {
@@ -640,8 +640,7 @@ public class MQClientInstance {
                     TopicRouteData topicRouteData;
                     //使用默认主题从NameServer获取路由信息
                     if (isDefault && defaultMQProducer != null) {
-                        topicRouteData = this.mQClientAPIImpl.getDefaultTopicRouteInfoFromNameServer(defaultMQProducer.getCreateTopicKey(),
-                            1000 * 3);
+                        topicRouteData = this.mQClientAPIImpl.getDefaultTopicRouteInfoFromNameServer(defaultMQProducer.getCreateTopicKey(),1000 * 3);
                         if (topicRouteData != null) {
                             for (QueueData data : topicRouteData.getQueueDatas()) {
                                 int queueNums = Math.min(defaultMQProducer.getDefaultTopicQueueNums(), data.getReadQueueNums());
@@ -657,12 +656,13 @@ public class MQClientInstance {
                         //判断路由是否需要更改
                         TopicRouteData old = this.topicRouteTable.get(topic);
                         boolean changed = topicRouteDataIsChange(old, topicRouteData);
+                        //未发生改变
                         if (!changed) {
                             changed = this.isNeedUpdateTopicRouteInfo(topic);
                         } else {
                             log.info("the topic[{}] route info changed, old[{}] ,new[{}]", topic, old, topicRouteData);
                         }
-
+                        //发生改变
                         if (changed) {
 
                             TopicRouteData cloneTopicRouteData = topicRouteData.cloneTopicRouteData();
@@ -833,10 +833,11 @@ public class MQClientInstance {
         Collections.sort(old.getBrokerDatas());
         Collections.sort(now.getQueueDatas());
         Collections.sort(now.getBrokerDatas());
+        //相同返回false
         return !old.equals(now);
 
     }
-
+    //fixme
     private boolean isNeedUpdateTopicRouteInfo(final String topic) {
         boolean result = false;
         {

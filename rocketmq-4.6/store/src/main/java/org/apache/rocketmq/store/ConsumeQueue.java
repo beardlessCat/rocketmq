@@ -476,7 +476,7 @@ public class ConsumeQueue {
 
         this.byteBufferIndex.flip();
         this.byteBufferIndex.limit(CQ_STORE_UNIT_SIZE);
-        this.byteBufferIndex.putLong(offset);
+        this.byteBufferIndex.putLong(offset);//设置在commitLog中的偏移量
         this.byteBufferIndex.putInt(size);  //设置消息的大小
         this.byteBufferIndex.putLong(tagsCode);  //设置消息的tag信息
 

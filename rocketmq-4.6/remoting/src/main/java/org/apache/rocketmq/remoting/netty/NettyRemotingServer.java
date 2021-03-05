@@ -195,6 +195,7 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
 
     @Override
     public void start() {
+
         this.defaultEventExecutorGroup = new DefaultEventExecutorGroup(
             nettyServerConfig.getServerWorkerThreads(),
             new ThreadFactory() {
@@ -245,11 +246,11 @@ public class NettyRemotingServer extends NettyRemotingAbstract implements Remoti
         } catch (InterruptedException e1) {
             throw new RuntimeException("this.serverBootstrap.bind().sync() InterruptedException", e1);
         }
-
+        //启动事件处理线程，处理onChannelConnect、onChannelClose、onChannelException及onChannelIdle事件，指的学习
         if (this.channelEventListener != null) {
             this.nettyEventExecutor.start();
         }
-
+        //??
         this.timer.scheduleAtFixedRate(new TimerTask() {
 
             @Override

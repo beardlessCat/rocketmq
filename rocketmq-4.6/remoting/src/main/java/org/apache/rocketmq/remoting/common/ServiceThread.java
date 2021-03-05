@@ -27,7 +27,7 @@ public abstract class ServiceThread implements Runnable {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(RemotingHelper.ROCKETMQ_REMOTING);
 
     private static final long JOIN_TIME = 90 * 1000;
-    protected final Thread thread;
+        protected final Thread thread;
     protected volatile boolean hasNotified = false;
     protected volatile boolean stopped = false;
 
