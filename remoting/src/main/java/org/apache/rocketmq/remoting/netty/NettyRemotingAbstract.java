@@ -403,7 +403,7 @@ public abstract class NettyRemotingAbstract {
             }
         }
     }
-
+    //真正调用netty api去发送请求
     public RemotingCommand invokeSyncImpl(final Channel channel, final RemotingCommand request,
         final long timeoutMillis)
         throws InterruptedException, RemotingSendRequestException, RemotingTimeoutException {
@@ -430,6 +430,7 @@ public abstract class NettyRemotingAbstract {
                 }
             });
 
+            //异步接受消息
             RemotingCommand responseCommand = responseFuture.waitResponse(timeoutMillis);
             if (null == responseCommand) {
                 if (responseFuture.isSendRequestOK()) {
