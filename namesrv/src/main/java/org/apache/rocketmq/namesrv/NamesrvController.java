@@ -86,9 +86,9 @@ public class NamesrvController {
         //初始化netty服务工作线程池
         this.remotingExecutor =
             Executors.newFixedThreadPool(nettyServerConfig.getServerWorkerThreads(), new ThreadFactoryImpl("RemotingExecutorThread_"));
-        //把工作线程池传递给netty服务
+        //把工作线程池传递给netty服务，注册请求处理器
         this.registerProcessor();
-        //后台定时任务（breaker相关） todo
+        //后台定时任务（breaker相关），每10s扫描存活breaker
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
