@@ -117,6 +117,7 @@ public class BrokerStartup {
             }
             //breaker 配置类
             final BrokerConfig brokerConfig = new BrokerConfig();
+            //需要同时启动netty服务端（producer及consumer连接）与netty客户端（连接nameServer）。
             //nettyServer 配置类
             final NettyServerConfig nettyServerConfig = new NettyServerConfig();
             //nettyClient配置类
@@ -193,7 +194,7 @@ public class BrokerStartup {
             if (messageStoreConfig.isEnableDLegerCommitLog()) {
                 brokerConfig.setBrokerId(-1);
             }
-
+            //todo 作用是？
             messageStoreConfig.setHaListenPort(nettyServerConfig.getListenPort() + 1);
             LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
             JoranConfigurator configurator = new JoranConfigurator();
@@ -208,7 +209,7 @@ public class BrokerStartup {
                 MixAll.printObjectProperties(console, nettyClientConfig);
                 MixAll.printObjectProperties(console, messageStoreConfig);
                 System.exit(0);
-               //有-p命令进行参数打印
+               //有-m命令进行参数打印
             } else if (commandLine.hasOption('m')) {
                 InternalLogger console = InternalLoggerFactory.getLogger(LoggerName.BROKER_CONSOLE_NAME);
                 MixAll.printObjectProperties(console, brokerConfig, true);

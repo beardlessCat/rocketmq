@@ -180,8 +180,11 @@ public class BrokerController {
         this.nettyClientConfig = nettyClientConfig;
         this.messageStoreConfig = messageStoreConfig;
         //breaker各种功能对应的组件
+        //consumer offSet 管理器
         this.consumerOffsetManager = new ConsumerOffsetManager(this);
+        //topic配置管理器
         this.topicConfigManager = new TopicConfigManager(this);
+        //
         this.pullMessageProcessor = new PullMessageProcessor(this);
         this.pullRequestHoldService = new PullRequestHoldService(this);
         this.messageArrivingListener = new NotifyMessageArrivingListener(this.pullRequestHoldService);
@@ -236,7 +239,7 @@ public class BrokerController {
     public boolean initialize() throws CloneNotSupportedException {
         //加载topic管理器
         boolean result = this.topicConfigManager.load();
-        //加载Cousumer的offSet
+        //加载Consumer的offSet
         result = result && this.consumerOffsetManager.load();
         //Consumer订阅组
         result = result && this.subscriptionGroupManager.load();
@@ -268,7 +271,7 @@ public class BrokerController {
         result = result && this.messageStore.load();
 
         if (result) {
-            //NettyRemotingServer
+            //NettyServer 初始化
             this.remotingServer = new NettyRemotingServer(this.nettyServerConfig, this.clientHousekeepingService);
             //原型模式
             NettyServerConfig fastConfig = (NettyServerConfig) this.nettyServerConfig.clone();
@@ -498,7 +501,7 @@ public class BrokerController {
                     log.warn("FileWatchService created error, can't load the certificate dynamically");
                 }
             }
-            //事务、acl权限、Rpc狗钩子
+            //事务、acl权限、Rpc钩子
             initialTransaction();
             initialAcl();
             initialRpcHooks();
@@ -881,7 +884,7 @@ public class BrokerController {
         if (this.fastRemotingServer != null) {
             this.fastRemotingServer.start();
         }
-        //启动fileWatch服务
+        //启动fileWatch线程启动
         if (this.fileWatchService != null) {
             this.fileWatchService.start();
         }
