@@ -388,7 +388,7 @@ public class DefaultRequestProcessor extends AsyncNettyRequestProcessor implemen
     }
 
     /**
-     * 根据topic查询路由信息
+     * 根据topic查询路由信息,路由发现
      * @param ctx
      * @param request
      * @return
