@@ -348,7 +348,9 @@ public class BrokerController {
 
             final long initialDelay = UtilAll.computeNextMorningTimeMillis() - System.currentTimeMillis();
             final long period = 1000 * 60 * 60 * 24;
-            //定时任务统计breaker
+            /**
+             * 定时任务统计breaker，
+             */
             this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
@@ -911,6 +913,11 @@ public class BrokerController {
             this.registerBrokerAll(true, false, true);
         }
         //Breaker将自己注册到NameServer
+        /**
+         * Broker 启动时会向集群中所有的 NameServ 发送心跳语句，每隔30s向集群中所有的NameServer发送心跳包，
+         * NameServer 收到 Broke的跳包后，会更新 brokerLiveTab 缓存中 BrokerLivelInfo。然后 NameServer 每隔 10s 扫描
+         * brokerLiveTable ，如果连续120s没有收到心跳包，NameServer将移除该Broker的路由信息同时断开Socket连接。
+         */
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override

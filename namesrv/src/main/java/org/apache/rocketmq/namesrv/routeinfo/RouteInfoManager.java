@@ -50,20 +50,20 @@ public class RouteInfoManager {
     private final static long BROKER_CHANNEL_EXPIRED_TIME = 1000 * 60 * 2;
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
     /**
-     * topic 信息存储
+     * Topic 消息队列路由信息，消息发送时根据路由表进行负均衡
      */
     private final HashMap<String/* topic */, List<QueueData>> topicQueueTable;
     /**
-     * broker 信息存储
+     * Broker 基础信息， brokerName所属集群名称主备 Broker地址
      */
     private final HashMap<String/* brokerName */, BrokerData> brokerAddrTable;
     /**
-     * cluster 集群信息
+     * cluster 集群信息，存储集群中所有 Broker名称
      */
     private final HashMap<String/* clusterName */, Set<String/* brokerName */>> clusterAddrTable;
 
     /**
-     * broker 存活监测信息
+     * broker 存活监测信息。NameServer 每次收到心跳包时会更新该信息。
      */
     private final HashMap<String/* brokerAddr */, BrokerLiveInfo> brokerLiveTable;
 
@@ -149,19 +149,22 @@ public class RouteInfoManager {
         try {
             try {
                 this.lock.writeLock().lockInterruptibly();
-
+                //先判断clusterAddrTable中是否有broker中是否有值
                 Set<String> brokerNames = this.clusterAddrTable.get(clusterName);
+                //为空的话初始化brokerNames集合
                 if (null == brokerNames) {
                     brokerNames = new HashSet<String>();
                     this.clusterAddrTable.put(clusterName, brokerNames);
                 }
+                //添加brokerName
                 brokerNames.add(brokerName);
-
+                //broker是否第一次注册
                 boolean registerFirst = false;
-
+                //判断brokerAddrTable中是否存在注册的broker的信息
                 BrokerData brokerData = this.brokerAddrTable.get(brokerName);
                 if (null == brokerData) {
                     registerFirst = true;
+                    //为空（第一次注册）
                     brokerData = new BrokerData(clusterName, brokerName, new HashMap<Long, String>());
                     this.brokerAddrTable.put(brokerName, brokerData);
                 }
@@ -192,7 +195,7 @@ public class RouteInfoManager {
                         }
                     }
                 }
-
+                //存放最新的broker心跳消息（map存放，每个broker最多只会有一条）
                 BrokerLiveInfo prevBrokerLiveInfo = this.brokerLiveTable.put(brokerAddr,
                     new BrokerLiveInfo(
                         System.currentTimeMillis(),
@@ -463,6 +466,10 @@ public class RouteInfoManager {
         return null;
     }
 
+    /**
+     * 扫描broker发送来的心跳日志，距最后一次心跳时间大于BROKER_CHANNEL_EXPIRED_TIME(120s)后，认为broker
+     * 挂掉，断开长链接，销毁Channel
+     */
     public void scanNotActiveBroker() {
         Iterator<Entry<String, BrokerLiveInfo>> it = this.brokerLiveTable.entrySet().iterator();
         while (it.hasNext()) {
@@ -477,6 +484,11 @@ public class RouteInfoManager {
         }
     }
 
+    /**
+     * nameServer中所有该broker中相关的路由信息全部移除
+     * @param remoteAddr
+     * @param channel
+     */
     public void onChannelDestroy(String remoteAddr, Channel channel) {
         String brokerAddrFound = null;
         if (channel != null) {

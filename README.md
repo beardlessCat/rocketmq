@@ -86,3 +86,20 @@ public RouteInfoManager() {
 ![](images/nameServer/nameServer启动流程.png)
 
 ### 4.netty服务启动
+
+### 5.路由注册
+RocketMQ 路由注册是通过 Broker Name Server 的心跳功能实现的 Broker 启动时
+集群中 所有的 NameServ 发送心跳语句，每隔 0s 集群 中所 NameServer 发送心
+跳包， NameServer 收到 Broke 跳包时会更新 brokerL veTab 缓存中 BrokerLivel nfo
+astUpdateTimestamp ，然后 NameServer 每隔 10s 扫描 brokerLiveTable ，如果连续 20s
+有收到心跳包， NameServ 将移除该 Broker 的路由 信息 同时 Socket 连接
+### 路由删除
+Broker每隔30s向NameServer发送一个心跳包，心跳包中包含Brokerld、Broker地址、Broker名称、Broker所属集群名称、Broker关联的FilterServer列表。、
+但是如果Broker宕机，NameServer无法收到心跳包，此时NameServer如何来剔除这些失效的Broker呢？Name Server会每隔10s扫描brokerLiveTable状态表，如果BrokerLive的
+lastUpdateTimestamp的时间戳距当前时间超过l20s，则认为Broker失效，移除该Broker，关闭与Broker连接，并同时更新topicQueueTable、brokerAddrTable、brokerLiveTable、
+terServerTable。
+RocktMQ有两个触发点来触发路由删除。
+- NameServer定时扫描brokerLiveTable检测上次心跳包与当前系统时间的时间差，如果时间戳大于120s（默认值），则需要移除该Broker信息。
+- Broker在正常被关闭的情况下，会执行unregisterBroker指令。
+由于不管是何种方式触发的路由删除，路由删除的方法都是一样的，就是从topic-QueueTable、brokerAddrTable、brokerLiveTable、filterServerTable删除与该Broker相关的
+信息。
