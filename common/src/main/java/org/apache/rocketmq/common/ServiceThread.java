@@ -44,6 +44,9 @@ public abstract class ServiceThread implements Runnable {
 
     public void start() {
         log.info("Try to start service thread:{} started:{} lastThread:{}", getServiceName(), started.get(), thread);
+        /**
+ *         CAS
+         */
         if (!started.compareAndSet(false, true)) {
             return;
         }

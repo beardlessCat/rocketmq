@@ -84,6 +84,7 @@ import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.apache.rocketmq.remoting.netty.NettyClientConfig;
 import org.apache.rocketmq.remoting.protocol.RemotingCommand;
 
+
 public class MQClientInstance {
     private final static long LOCK_TIMEOUT_MILLIS = 3000;
     private final InternalLogger log = ClientLogger.getLog();
@@ -232,16 +233,21 @@ public class MQClientInstance {
                         this.mQClientAPIImpl.fetchNameServerAddr();
                     }
                     // Start request-response channel
+                    //【恍然大明白】
+                    //
+                    // netty客户端气启动
                     this.mQClientAPIImpl.start();
-                    // Start various schedule tasks
+
+                    // Start various schedule tasks 启动几个后台定时任务
                     this.startScheduledTask();
                     // Start pull service
                     this.pullMessageService.start();
-                    // Start rebalance service
+                    // Start rebalance service todo
                     this.rebalanceService.start();
                     // Start push service
                     this.defaultMQProducer.getDefaultMQProducerImpl().start(false);
                     log.info("the client factory [{}] start OK", this.clientId);
+                    //调整服务状态
                     this.serviceState = ServiceState.RUNNING;
                     break;
                 case START_FAILED:
@@ -252,8 +258,13 @@ public class MQClientInstance {
         }
     }
 
+    /**
+     * 【恍然大明白】：封装了nettyClient、nettyClient可以让各个组件去调用，相关启动方法制的学习
+     * 弃用zk,意味着需要启动定时任务线程不断的去拉取更新某些相关配置
+     */
     private void startScheduledTask() {
         if (null == this.clientConfig.getNamesrvAddr()) {
+            //定时拉取nameSvr的信息
             this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
                 @Override
@@ -266,7 +277,9 @@ public class MQClientInstance {
                 }
             }, 1000 * 10, 1000 * 60 * 2, TimeUnit.MILLISECONDS);
         }
-
+        /**
+         * 定时更新路由信息
+         */
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
@@ -278,7 +291,9 @@ public class MQClientInstance {
                 }
             }
         }, 10, this.clientConfig.getPollNameServerInterval(), TimeUnit.MILLISECONDS);
-
+        /**
+         * broker心跳发送及存活broker更新
+         */
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
@@ -291,7 +306,9 @@ public class MQClientInstance {
                 }
             }
         }, 1000, this.clientConfig.getHeartbeatBrokerInterval(), TimeUnit.MILLISECONDS);
-
+        /**
+         * 持久化消费者offSet
+         */
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
@@ -303,7 +320,9 @@ public class MQClientInstance {
                 }
             }
         }, 1000 * 10, this.clientConfig.getPersistConsumerOffsetInterval(), TimeUnit.MILLISECONDS);
-
+        /**
+         * todo
+         */
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
@@ -927,6 +946,12 @@ public class MQClientInstance {
         }
     }
 
+    /**
+     * 增加client缓存 todo？
+     * @param group
+     * @param producer
+     * @return
+     */
     public boolean registerProducer(final String group, final DefaultMQProducerImpl producer) {
         if (null == group || null == producer) {
             return false;

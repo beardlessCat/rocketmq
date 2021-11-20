@@ -27,7 +27,7 @@ import org.apache.rocketmq.remoting.exception.RemotingException;
  */
 public interface MQAdmin {
     /**
-     * Creates an topic
+     * Creates an topic 创建一个主题
      *
      * @param key accesskey
      * @param newTopic topic name

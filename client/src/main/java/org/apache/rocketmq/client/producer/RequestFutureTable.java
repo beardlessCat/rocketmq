@@ -35,6 +35,9 @@ public class RequestFutureTable {
         return requestFutureTable;
     }
 
+    /**
+     * 扫描过期请求进行移除
+     */
     public static void scanExpiredRequest() {
         final List<RequestResponseFuture> rfList = new LinkedList<RequestResponseFuture>();
         Iterator<Map.Entry<String, RequestResponseFuture>> it = requestFutureTable.entrySet().iterator();
