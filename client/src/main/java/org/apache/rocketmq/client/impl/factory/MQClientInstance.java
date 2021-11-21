@@ -233,7 +233,7 @@ public class MQClientInstance {
                         this.mQClientAPIImpl.fetchNameServerAddr();
                     }
                     // Start request-response channel
-                    //【恍然大明白】
+                    //【恍然大明白】 封装了nettyClient、nettyClient可以让各个组件去调用，相关启动方法制的学习
                     //
                     // netty客户端气启动
                     this.mQClientAPIImpl.start();
@@ -260,7 +260,7 @@ public class MQClientInstance {
     }
 
     /**
-     * 【恍然大明白】：封装了nettyClient、nettyClient可以让各个组件去调用，相关启动方法制的学习
+     * 【恍然大明白】：
      * 弃用zk,意味着需要启动定时任务线程不断的去拉取更新某些相关配置
      */
     private void startScheduledTask() {
@@ -627,6 +627,7 @@ public class MQClientInstance {
         try {
             if (this.lockNamesrv.tryLock(LOCK_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)) {
                 try {
+
                     TopicRouteData topicRouteData;
                     if (isDefault && defaultMQProducer != null) {
                         topicRouteData = this.mQClientAPIImpl.getDefaultTopicRouteInfoFromNameServer(defaultMQProducer.getCreateTopicKey(),
@@ -639,10 +640,13 @@ public class MQClientInstance {
                             }
                         }
                     } else {
+                        //从nameSrv查询topic信息
                         topicRouteData = this.mQClientAPIImpl.getTopicRouteInfoFromNameServer(topic, 1000 * 3);
                     }
                     if (topicRouteData != null) {
                         TopicRouteData old = this.topicRouteTable.get(topic);
+                        //判断是否发生变动
+                        //如果路由信息找到，与本地缓存中的路由信息进行对比，判断路由信息是否发了改变， 如果未发生变化，则直接返回 false
                         boolean changed = topicRouteDataIsChange(old, topicRouteData);
                         if (!changed) {
                             changed = this.isNeedUpdateTopicRouteInfo(topic);

@@ -103,3 +103,10 @@ RocktMQ有两个触发点来触发路由删除。
 - Broker在正常被关闭的情况下，会执行unregisterBroker指令。
 由于不管是何种方式触发的路由删除，路由删除的方法都是一样的，就是从topic-QueueTable、brokerAddrTable、brokerLiveTable、filterServerTable删除与该Broker相关的
 信息。
+## 二、消息生产者
+### 1.生产者启动
+### 2.消息发送
+消息发送主要分为三个步骤：
+验证消息、查找路由 消息发送 （包含异常处理机制）
+
+选择消息队列算法
