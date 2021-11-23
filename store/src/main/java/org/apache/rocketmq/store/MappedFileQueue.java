@@ -34,18 +34,38 @@ public class MappedFileQueue {
     private static final InternalLogger LOG_ERROR = InternalLoggerFactory.getLogger(LoggerName.STORE_ERROR_LOGGER_NAME);
 
     private static final int DELETE_FILES_BATCH_MAX = 10;
-
+    /**
+     * 存储路径
+     */
     private final String storePath;
-
+    /**
+     * 单个文件存储大小
+     */
     private final int mappedFileSize;
 
+    /**
+     * MappedFile集合
+     */
     private final CopyOnWriteArrayList<MappedFile> mappedFiles = new CopyOnWriteArrayList<MappedFile>();
 
+    /**
+     * MappedFile 服务
+     */
     private final AllocateMappedFileService allocateMappedFileService;
 
+    /**
+     * 刷盘指针，表示该指针之前的所有数据全部持久化到磁盘
+     */
     private long flushedWhere = 0;
+
+    /**
+     * 数据提交指针，，内存中 ByteBuffer 当前的写指针，该值大于等于 flushedWhere
+     */
     private long committedWhere = 0;
 
+    /**
+     * 存储事件戳
+     */
     private volatile long storeTimestamp = 0;
 
     public MappedFileQueue(final String storePath, int mappedFileSize,
@@ -74,6 +94,11 @@ public class MappedFileQueue {
         }
     }
 
+    /**
+     * 根据时间戳查找MappedFile，找到第一个最后更新时间大于查找时间的文件
+     * @param timestamp
+     * @return
+     */
     public MappedFile getMappedFileByTime(final long timestamp) {
         Object[] mfs = this.copyMappedFiles(0);
 
@@ -333,6 +358,14 @@ public class MappedFileQueue {
         }
     }
 
+    /**
+     * 根据时间删除过期offSet
+     * @param expiredTime
+     * @param deleteFilesInterval
+     * @param intervalForcibly
+     * @param cleanImmediately
+     * @return
+     */
     public int deleteExpiredFileByTime(final long expiredTime,
         final int deleteFilesInterval,
         final long intervalForcibly,
@@ -379,6 +412,12 @@ public class MappedFileQueue {
         return deleteCount;
     }
 
+    /**
+     * 根据offSet删除过期MappedFile
+     * @param offset
+     * @param unitSize
+     * @return
+     */
     public int deleteExpiredFileByOffset(long offset, int unitSize) {
         Object[] mfs = this.copyMappedFiles(0);
 
@@ -503,6 +542,10 @@ public class MappedFileQueue {
         return null;
     }
 
+    /**
+     * 查找第一个MappedFile
+     * @return
+     */
     public MappedFile getFirstMappedFile() {
         MappedFile mappedFileFirst = null;
 
@@ -523,6 +566,10 @@ public class MappedFileQueue {
         return findMappedFileByOffset(offset, false);
     }
 
+    /**
+     * 获取映射内存
+     * @return
+     */
     public long getMappedMemorySize() {
         long size = 0;
 

@@ -25,9 +25,18 @@ import org.apache.rocketmq.logging.InternalLoggerFactory;
 import org.apache.rocketmq.store.config.BrokerRole;
 import org.apache.rocketmq.store.config.StorePathConfigHelper;
 
+/**
+ * RocketMQ 基于主题订阅模式实现消息消费，消费者关心的是一个主题下的所有消
+ * 息，但由于同一主题的消息不连续地存储在 commitlog 文件中，试想一下如果消息消费
+ * 者直接从消息存储文件（commitlog）中去遍历查找订阅主题下的消息，效率将极其低下，
+ * RocketMQ 为了适应消息消费的检索需求，设计了消息消费队列文件（Consumequeue），该
+ * 文件可以看成是 Commitlog 关于消息消费的“索引”文件， consumequeue 的第一级目录为消息主题，第二级目录为主题的消息队列，
+ */
 public class ConsumeQueue {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
-
+    /**
+     * ConsumeQueue中每个单元的大小
+     */
     public static final int CQ_STORE_UNIT_SIZE = 20;
     private static final InternalLogger LOG_ERROR = InternalLoggerFactory.getLogger(LoggerName.STORE_ERROR_LOGGER_NAME);
 
@@ -152,6 +161,11 @@ public class ConsumeQueue {
         }
     }
 
+    /**
+     * 根据消息存储时间查找（二分查找法）
+     * @param timestamp
+     * @return
+     */
     public long getOffsetInQueueByTime(final long timestamp) {
         MappedFile mappedFile = this.mappedFileQueue.getMappedFileByTime(timestamp);
         if (mappedFile != null) {
@@ -488,10 +502,16 @@ public class ConsumeQueue {
         }
     }
 
+    /**
+     *根据startIndex获取消费消息队列中条目 todo??
+     * @param startIndex
+     * @return
+     */
     public SelectMappedBufferResult getIndexBuffer(final long startIndex) {
         int mappedFileSize = this.mappedFileSize;
         long offset = startIndex * CQ_STORE_UNIT_SIZE;
         if (offset >= this.getMinLogicOffset()) {
+            //查找
             MappedFile mappedFile = this.mappedFileQueue.findMappedFileByOffset(offset);
             if (mappedFile != null) {
                 SelectMappedBufferResult result = mappedFile.selectMappedBuffer((int) (offset % mappedFileSize));
