@@ -88,9 +88,8 @@ public class NamesrvController {
             Executors.newFixedThreadPool(nettyServerConfig.getServerWorkerThreads(), new ThreadFactoryImpl("RemotingExecutorThread_"));
         //把工作线程池传递给netty服务，注册请求处理器
         this.registerProcessor();
-        //后台定时任务（breaker相关），每10s扫描存活breaker
+        //后台定时任务，每10s扫描存活breaker
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
-
             @Override
             public void run() {
                 NamesrvController.this.routeInfoManager.scanNotActiveBroker();

@@ -160,6 +160,10 @@ public class ScheduleMessageService extends ConfigManager {
         return this.encode(false);
     }
 
+    /**
+     * 完成延迟消息消息进度的加载及delayLevelTable数据的构造，延迟消息的进度默认存储路径
+     * @return
+     */
     public boolean load() {
         boolean result = super.load();
         result = result && this.parseDelayLevel();
