@@ -2,7 +2,7 @@
 
 整体架构按角色分文：nameServer、broker、producer及consumer。
 
-![](https://tcs.teambition.net/storage/312c7891a6c8ce51fa6ea3adb1e453aebf6f?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IiIsImV4cCI6MTYzODU5NDEzNCwiaWF0IjoxNjM3OTg5MzM0LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMmM3ODkxYTZjOGNlNTFmYTZlYTNhZGIxZTQ1M2FlYmY2ZiJ9.JIMT7yyzDAHrq78OLjghMvhraiijqun1n-mClN8BxOs&download=image.png "")
+![](./images/1.png)
 
 ## 1.broker路由注册
 
@@ -40,7 +40,7 @@ Broker跟NameServer之间通过netty长链接通信，两种之间存在心跳�
 
 nameServer每10s检查一下心跳时间，如果超过120s未收到新的心跳包，则认为broker已经宕机，便在nameServer中剔除改broker的路由信息。
 
-![](https://tcs.teambition.net/storage/312c6216e55e430454142ee3e837e99135bb?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IjVmYWZhYjk1YTNkYmY4NTljODhkN2ZiNiIsImV4cCI6MTYzNzk5NDIzNiwiaWF0IjoxNjM3OTkwNjM2LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMmM2MjE2ZTU1ZTQzMDQ1NDE0MmVlM2U4MzdlOTkxMzViYiJ9.t8iz6FsTq-j_43QzEs_gWYAXywyNkeiDZq4KrJ6G_qw&download=image.png "")
+![](./images/2.png)
 
 - broker心跳发送定时任务（BrokerController#start）
 
@@ -270,31 +270,31 @@ MQ会收到大量的消息，这些消息并不是立马就会被所有的消费
 
 发送消息到MQ的系统会把消息分散发送给多台不同的机器，假设一共有3000条消息，分散发送给3台机器，可能每台机器就是接收到1000条消息。
 
-![](https://tcs.teambition.net/storage/312c83e853bc4c13c712373252a12cb89038?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IjVmYWZhYjk1YTNkYmY4NTljODhkN2ZiNiIsImV4cCI6MTYzNzk5NzMyMiwiaWF0IjoxNjM3OTkzNzIyLCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMmM4M2U4NTNiYzRjMTNjNzEyMzczMjUyYTEyY2I4OTAzOCJ9.zjWu-1amqYpbFjBZYw7gexqofw8yL15poWWTZlJPtdc&download=image.png "")
+![](./images/3.png)
 
 ## 2.RocketMQ是如何集群化部署来承载高并发访问的？
 
 RocketMQ是可以集群化部署的，可以部署在多台机器上，假设每台机器都能抗10万并发，然后你只要让几十万请求分散到多台机器上就可以了，让每台机器承受的QPS不超过10万不就行了。
 
-![](https://tcs.teambition.net/storage/312c1e209573db53476bf5f2020c1cf612b3?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IjVmYWZhYjk1YTNkYmY4NTljODhkN2ZiNiIsImV4cCI6MTYzNzk5NzQwMCwiaWF0IjoxNjM3OTkzODAwLCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMmMxZTIwOTU3M2RiNTM0NzZiZjVmMjAyMGMxY2Y2MTJiMyJ9.Zfw1HSSYUHde7SHBLdlBNON2CDTVRRHTamDOiRnayAM&download=image.png "")
+![](./images/4.png)
 
 ## 3.任何一台Broker突然宕机了怎么办？
 
 那不就会导致RocketMQ里一部分的消息就没了吗？这就会导致MQ的不可靠和不可用，这个问题怎么解决。RocketMQ的解决思路是**Broker主从架构以及多副本策略**。
 
-![](https://tcs.teambition.net/storage/312c7021ad137eb6521b9063493ebec3289d?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IjVmYWZhYjk1YTNkYmY4NTljODhkN2ZiNiIsImV4cCI6MTYzNzk5NzY1MiwiaWF0IjoxNjM3OTk0MDUyLCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMmM3MDIxYWQxMzdlYjY1MjFiOTA2MzQ5M2ViZWMzMjg5ZCJ9.nez-h-WWxNGoleXqxL221wNqoD8zrYL2Ig3BU6U13yo&download=image.png "")
+![](./images/5.png)
 
 ## 4.生产者和消费者如何从NameServer那儿获取到集群的Broker信息呢？
 
 RocketMQ中的生产者和消费者就是这样，自己主动去NameServer拉取Broker信息的。
 
-![](https://tcs.teambition.net/storage/312c0fc4a5f12eee8cdb931374c79e549de6?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IjVmYWZhYjk1YTNkYmY4NTljODhkN2ZiNiIsImV4cCI6MTYzNzk5Nzg1NiwiaWF0IjoxNjM3OTk0MjU2LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMmMwZmM0YTVmMTJlZWU4Y2RiOTMxMzc0Yzc5ZTU0OWRlNiJ9.W5mbAjQ-PQ6VSxPYOINUiMl4-3lzBYXzskK5gz4LPz8&download=image.png "")
+![](./images/6.png)
 
 ## 5.Master Broker是如何将消息同步给Slave Broker的？
 
 RocketMQ的Master-Slave模式采取的是Slave Broker不停的发送请求到Master Broker去拉取消息。
 
-![](https://tcs.teambition.net/storage/312c46413da2a6c208150d8c8a4ed90fb86c?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IjVmYWZhYjk1YTNkYmY4NTljODhkN2ZiNiIsImV4cCI6MTYzNzk5ODE5OCwiaWF0IjoxNjM3OTk0NTk4LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMmM0NjQxM2RhMmE2YzIwODE1MGQ4YzhhNGVkOTBmYjg2YyJ9._CEBKHx4KBQyXFIuOmRERwnxtsT7JAYg5WqRoI-XC7k&download=image.png "")
+![](./images/7.png)
 
 ## 6.消费者获取消息的时候，是从Master获取还是从Slave获取?
 
@@ -316,7 +316,7 @@ RocketMQ的Master-Slave模式采取的是Slave Broker不停的发送请求到Mas
 
 这里唯一要注意的一点，**就是生产者一定是投递消息到Master Broker的**，然后Master Broker会同步数据给他的Slave Brokers，实现一份数据多份副本，保证Master故障的时候数据不丢失，而且可以自动把Slave切换为Master提供服务。
 
-![](https://tcs.teambition.net/storage/312c63cdf6208e36d8d16fb89588b8b92d32?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IjVmYWZhYjk1YTNkYmY4NTljODhkN2ZiNiIsImV4cCI6MTYzNzk5OTYxNCwiaWF0IjoxNjM3OTk2MDE0LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMmM2M2NkZjYyMDhlMzZkOGQxNmZiODk1ODhiOGI5MmQzMiJ9.z0RG8FYimelqZWvSSocVWNNa2tBcsb27daPg9nvJUIc&download=image.png "")
+![](./images/8.png)
 
 
 
@@ -324,7 +324,7 @@ RocketMQ的Master-Slave模式采取的是Slave Broker不停的发送请求到Mas
 
 消费者系统其实跟生产者系统原理是类似的，他们也会跟NameServer建立长连接，然后拉取路由信息，接着找到自己要获取消息的Topic在哪几台Broker上，就可以跟Broker建立长连接，从里面拉取消息了。
 
-![](https://tcs.teambition.net/storage/312cfc0c697303545b91a58ec108186ab76b?Signature=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcHBJRCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9hcHBJZCI6IjU5Mzc3MGZmODM5NjMyMDAyZTAzNThmMSIsIl9vcmdhbml6YXRpb25JZCI6IjVmYWZhYjk1YTNkYmY4NTljODhkN2ZiNiIsImV4cCI6MTYzNzk5OTkxOSwiaWF0IjoxNjM3OTk2MzE5LCJyZXNvdXJjZSI6Ii9zdG9yYWdlLzMxMmNmYzBjNjk3MzAzNTQ1YjkxYTU4ZWMxMDgxODZhYjc2YiJ9.KVQzrXN0ApHpK7bnL1iYtX-NS601XXTiutJsPlfLa0Y&download=image.png "")
+![](./images/9.png)
 
 **消费者系统可能会从Master Broker拉取消息，也可能从Slave Broker拉取消息。**
 
