@@ -1,16 +1,49 @@
-*dependency-reduced-pom.xml
+# maven ignore
+target/
+*.jar
+!.mvn/wrapper/*
+*.war
+*.zip
+*.tar
+*.tar.gz
+
+# eclipse ignore
+.settings/
+.project
+.classpath
+
+
+# temp ignore
+*.class
+*.log
+*.cache
+*.diff
+*.patch
+*.tmp
+
+# system ignore
+.DS_Store
+Thumbs.db
+*.orig
+
+# idea ignore
+.idea/
+*.ipr
+*.iws
+.mymetadata
+.checkstyle
 .classpath
 .project
-.settings/
-target/
-devenv
-*.log*
+.class
+.war
+.zip
+.rar
 *.iml
-.idea/
-*.versionsBackup
-!NOTICE-BIN
-!LICENSE-BIN
-.DS_Store
-localbin
-nohup.out
-/ws/
+.settings/*
+/indexes/*
+/target/*
+/src/main/webapp/WEB-INF/classes/*
+/src/main/webapp/userfiles/*
+/target/
+# *.properties
+
